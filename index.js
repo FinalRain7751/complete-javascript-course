@@ -6,7 +6,7 @@ console.log(country, continent, populationInMillions);
 
 const isIsland = false;
 let language;
-language = "Bengali";
+language = "Bangla";
 // country = "China"; Assignment to const variable cannot be done
 
 console.log(
