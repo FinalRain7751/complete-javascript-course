@@ -3,12 +3,12 @@
 // const averageScoreKoalas = (88 + 91 + 110) / 3;
 
 // Bonus 1 Data
-// const averageScoreDolphins = (97 + 112 + 101) / 3;
-// const averageScoreKoalas = (109 + 95 + 123) / 3;
+const averageScoreDolphins = (97 + 112 + 81) / 3;
+const averageScoreKoalas = (109 + 95 + 86) / 3;
 
 // Bonus 2 data
-const averageScoreDolphins = (97 + 112 + 101) / 3;
-const averageScoreKoalas = (109 + 95 + 106) / 3;
+// const averageScoreDolphins = (97 + 112 + 101) / 3;
+// const averageScoreKoalas = (109 + 95 + 106) / 3;
 
 // Main logic
 if (averageScoreDolphins > averageScoreKoalas && averageScoreDolphins >= 100) {
@@ -22,6 +22,6 @@ if (averageScoreDolphins > averageScoreKoalas && averageScoreDolphins >= 100) {
   if (averageScoreDolphins >= 100) {
     console.log(`It's a draw(${averageScoreDolphins})😑`);
   } else {
-    console.log("No one gets the trophy!(${averageScoreDolphins})");
+    console.log(`No one gets the trophy!`);
   }
 }

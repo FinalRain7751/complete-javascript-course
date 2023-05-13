@@ -1,2 +1,2 @@
- 3;
-const averageScoreKoalas = (109 + 95 + 123) / 3;
+101) / 3;
+// const averageScoreKoalas = (109 + 95 + 10
