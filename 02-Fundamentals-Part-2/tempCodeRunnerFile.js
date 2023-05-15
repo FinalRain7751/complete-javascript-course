@@ -1,2 +1,2 @@
-
-const avgKoalas = calcAverage(65, 54, 49);
+let higher = {};
+// let lower = {};
