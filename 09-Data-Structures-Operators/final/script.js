@@ -308,7 +308,6 @@ const gameEvents = new Map([
   [72, '🔁 Substitution'],
   [76, '⚽️ GOAL'],
   [80, '⚽️ GOAL'],
-  [92, '🔶 Yellow card'],
 ]);
 
 /*
