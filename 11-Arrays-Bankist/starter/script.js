@@ -61,10 +61,12 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-const displayMovements = function (movements) {
+const displayMovements = function (movements, sort = false) {
   containerMovements.innerHTML = '';
 
-  movements.forEach(function (mov, i) {
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+  movs.forEach(function (mov, i) {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
     const html = `
     <div class="movements__row">
@@ -80,14 +82,43 @@ const displayMovements = function (movements) {
   });
 };
 
-displayMovements(account1.movements);
+const calcDisplaySummary = function (account) {
+  const incomes = account.movements
+    .filter(mov => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
 
-const calcDisplayBalance = function (movements) {
-  const balance = movements.reduce((acc, mov) => acc + mov, 0);
-  labelBalance.textContent = `${balance} EUR`;
+  labelSumIn.textContent = `${incomes}€`;
+
+  const expenses = account.movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => Math.abs(mov) + acc, 0);
+
+  labelSumOut.textContent = `${expenses}€`;
+
+  const interest = account.movements
+    .filter(mov => mov > 0)
+    .map(deposit => (deposit * account.interestRate) / 100)
+    .filter(int => int >= 1)
+    .reduce((acc, int) => acc + int);
+
+  labelSumInterest.textContent = `${interest}€`;
 };
 
-calcDisplayBalance(account1.movements);
+const calcDisplayBalance = function (account) {
+  account.balance = account.movements.reduce((acc, mov) => acc + mov, 0);
+  labelBalance.textContent = `${account.balance} EUR`;
+};
+
+const updateUI = function (account) {
+  // Display movements
+  displayMovements(account.movements);
+
+  // Display balance
+  calcDisplayBalance(account);
+
+  // Display summary
+  calcDisplaySummary(account);
+};
 
 const createUsernames = function (accounts) {
   accounts.forEach(function (account) {
@@ -101,12 +132,187 @@ const createUsernames = function (accounts) {
 
 createUsernames(accounts);
 
-const calcAverageHumanAge = function (dogAges) {
-  return dogAges
-    .map(age => (age <= 2 ? age * 2 : 16 + age * 4))
-    .filter(humanAge => humanAge >= 18)
-    .reduce((sum, age) => (sum + age) / 2, 0);
+const euroToUSD = 1.1;
+const totalDepositesINUSD = movements => {
+  return movements
+    .filter(mov => mov > 0)
+    .map((mov, i, arr) => {
+      console.log(arr);
+      return mov * euroToUSD;
+    })
+    .reduce((acc, mov) => acc + mov, 0);
 };
 
-console.log(calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]));
-console.log(calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]));
+// Event Handler for login
+let currentAccount;
+
+btnLogin.addEventListener('click', function (e) {
+  // Prevent form from submitting
+  e.preventDefault();
+
+  currentAccount = accounts.find(
+    acc => acc.username === inputLoginUsername.value
+  );
+  console.log(currentAccount);
+
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    // Display UI and message
+    labelWelcome.textContent = `Welcome back, ${
+      currentAccount.owner.split(' ')[0]
+    }`;
+
+    containerApp.style.opacity = 1;
+
+    // Clear input fields
+    inputLoginUsername.value = '';
+    inputLoginPin.value = '';
+    inputLoginPin.blur();
+    inputLoginUsername.blur();
+
+    updateUI(currentAccount);
+  }
+});
+
+btnLoan.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  const loanAmount = Math.abs(Number(inputLoanAmount.value));
+
+  if (
+    loanAmount &&
+    currentAccount.movements.some(mov => mov >= 0.1 * loanAmount)
+  ) {
+    // Update account
+    currentAccount.movements.push(loanAmount);
+  }
+  // Update UI
+  updateUI(currentAccount);
+
+  // Clear input fields
+  inputLoanAmount.value = '';
+  inputLoanAmount.blur();
+});
+
+btnTransfer.addEventListener('click', function (e) {
+  e.preventDefault();
+  const amount = Number(inputTransferAmount.value);
+  const receiver = accounts.find(
+    acc => acc.username === `${inputTransferTo.value}`
+  );
+
+  console.log(receiver);
+  // Add transactions to the movements array
+
+  if (
+    amount > 0 &&
+    receiver &&
+    currentAccount.balance >= amount &&
+    receiver.username !== currentAccount.username
+  ) {
+    currentAccount.movements.push(-amount);
+    receiver.movements.push(amount);
+  }
+
+  updateUI(currentAccount);
+
+  // Clean input fields
+  inputTransferAmount.value = inputTransferTo.value = '';
+  inputTransferAmount.blur();
+  inputTransferTo.blur();
+});
+
+btnClose.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  // Delete account
+  if (
+    inputCloseUsername.value === currentAccount.username &&
+    Number(inputClosePin.value) === currentAccount.pin
+  ) {
+    accounts.splice(
+      accounts.findIndex(acc => acc.username === currentAccount.username),
+      1
+    );
+    console.log(accounts);
+  }
+
+  // Clear input fields
+
+  inputCloseUsername.value = inputClosePin.value = '';
+  inputCloseUsername.blur();
+  inputClosePin.blur();
+
+  // Hide UI
+  containerApp.style.opacity = 0;
+});
+
+let sorted = false;
+btnSort.addEventListener('click', function (e) {
+  e.preventDefault();
+  displayMovements(currentAccount.movements, !sorted);
+  sorted = !sorted;
+});
+
+labelBalance.addEventListener('click', function () {
+  const movementsUI = Array.from(
+    document.querySelectorAll('.movements__value')
+  );
+
+  console.log(movementsUI);
+});
+
+// Array methods Practice
+// 1.
+
+const bankDepositSum = accounts
+  .flatMap(acc => acc.movements.filter(mov => mov > 0))
+  .reduce((acc, mov) => acc + mov);
+
+console.log(bankDepositSum);
+
+// 2.
+
+const numDeposits1000 = accounts
+  .flatMap(acc => acc.movements)
+  .reduce((acc, mov, i) => (mov >= 1000 ? ++acc : acc), 0);
+
+console.log(numDeposits1000);
+
+// 3.
+
+const sums = accounts
+  .flatMap(acc => acc.movements)
+  .reduce(
+    (acc, mov) => {
+      mov > 0 ? (acc.deposits += 1) : (acc.withdrawals += 1);
+      return acc;
+    },
+    {
+      deposits: 0,
+      withdrawals: 0,
+    }
+  );
+
+console.log(sums);
+
+// 4
+// Convert to title case
+
+const toTitleCase = function (title) {
+  const exceptions = ['a', 'an', 'and', 'the', 'but', 'or', 'on', 'in', 'with'];
+  const tilteCase = title
+    .toLowerCase()
+    .split(' ')
+    .reduce((acc, word, i) => {
+      const first = word[0].toUpperCase();
+      const others = word.slice(1);
+      if (i === 0) return acc + first + others + ' ';
+      if (exceptions.includes(word)) return acc + word + ' ';
+      else {
+        return acc + first + others + ' ';
+      }
+    }, '');
+  return tilteCase.trim();
+};
+
+console.log(toTitleCase('a is a LONG title but Not that lONG'));
