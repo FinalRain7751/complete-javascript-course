@@ -129,6 +129,10 @@ img {
   position: fixed;
   background-color: rgba(255, 255, 255, 0.95);
 }
+/* .nav {
+  position: fixed;
+  background-color: rgba(255, 255, 255, 0.95);
+} */
 
 .nav__logo {
   height: 4.5rem;
@@ -320,6 +324,7 @@ h4 {
   /* JUST PRESENTATIONAL */
   font-size: 1.7rem;
   padding: 2.5rem 7rem 6.5rem 7rem;
+  /* transition: opacity 5000ms; */
 }
 
 .operations__content--active {
