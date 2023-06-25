@@ -241,3 +241,32 @@ TEST COORDINATES 2: -33.933, 18.474
 
 GOOD LUCK 😀
 */
+
+const lotteryPromise = new Promise(function (resolve, reject) {
+  console.log('Lottery draw is happening');
+  setTimeout(() => {
+    if (Math.random() >= 0.5) resolve('You win 🏆');
+    else reject(new Error('You lost your money 💩'));
+  }, 2000);
+});
+
+lotteryPromise.then(res => console.log(res)).catch(err => console.error(err));
+
+// Promisifying setTimeout
+const wait = function (seconds) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, seconds * 1000);
+  });
+};
+
+wait(2)
+  .then(() => {
+    console.log('Waited for 2 seconds.');
+    return wait(1);
+  })
+  .then(() => {
+    console.log('Waited for 1 second.');
+  });
+
+Promise.resolve('abc').then(x => console.log(x));
+Promise.reject('error').catch(x => console.error(x));
