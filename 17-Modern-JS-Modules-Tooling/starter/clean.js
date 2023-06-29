@@ -1,4 +1,4 @@
-var budget = [
+const budget = [
   { value: 250, description: 'Sold old TV 📺', user: 'jonas' },
   { value: -45, description: 'Groceries 🥑', user: 'jonas' },
   { value: 3500, description: 'Monthly salary 👩‍💻', user: 'jonas' },
@@ -9,56 +9,57 @@ var budget = [
   { value: -1800, description: 'New Laptop 💻', user: 'jonas' },
 ];
 
-var limits = {
+const spendingLimits = {
   jonas: 1500,
   matilda: 100,
 };
 
-var add = function (value, description, user) {
-  if (!user) user = 'jonas';
-  user = user.toLowerCase();
+const getCleanUser = user => user.toLowerCase();
 
-  var lim;
-  if (limits[user]) {
-    lim = limits[user];
-  } else {
-    lim = 0;
-  }
+const getLimit = (user, limits) => limits?.[user] ?? 0;
 
-  if (value <= lim) {
-    budget.push({ value: -value, description: description, user: user });
+const addExpense = function (
+  state,
+  value,
+  description,
+  limits,
+  user = 'jonas'
+) {
+  const cleanUser = getCleanUser(user);
+
+  const limit = getLimit(cleanUser, limits);
+
+  if (value <= limit) {
+    return [...state, { value: -value, description, cleanUser }];
   }
 };
-add(10, 'Pizza 🍕');
-add(100, 'Going to movies 🍿', 'Matilda');
-add(200, 'Stuff', 'Jay');
+const newBudeget1 = addExpense(budget, 10, 'Pizza 🍕', spendingLimits);
+const newBudeget2 = addExpense(
+  newBudeget1,
+  100,
+  'Pizza 🍕',
+  spendingLimits,
+  'Matilda'
+);
 console.log(budget);
 
-var check = function () {
-  for (var el of budget) {
-    var lim;
-    if (limits[el.user]) {
-      lim = limits[el.user];
-    } else {
-      lim = 0;
-    }
-
-    if (el.value < -lim) {
-      el.flag = 'limit';
-    }
-  }
+const checkExpenses = function (state, limits, user) {
+  return state.map(entry => {
+    return entry.value < -getLimit(getCleanUser(user), limits)
+      ? { ...entry, flag: 'limit' }
+      : entry;
+  });
 };
-check();
 
 console.log(budget);
 
-var bigExpenses = function (limit) {
-  var output = '';
-  for (var el of budget) {
-    if (el.value <= -limit) {
-      output += el.description.slice(-2) + ' / '; // Emojis are 2 chars
-    }
-  }
-  output = output.slice(0, -2); // Remove last '/ '
-  console.log(output);
+const logBigExpenses = function (state, limits, user) {
+  console.log(
+    state
+      .filter(entry => entry.value <= -getLimit(user, limits))
+      .map(entry => entry.description.slice(-2))
+      .join(' /')
+  );
 };
+
+logBigExpenses(budget, spendingLimits, 'jonas');
